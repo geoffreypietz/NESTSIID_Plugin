@@ -1,0 +1,6 @@
+style.css,.\html\hspi_nestsiid\css,0
+userprefs.txt,.\Data\hspi_nestsiid,16
+debug.txt,.\Data\hspi_nestsiid,16
+HSPI_NESTSIID.exe,.,0
+HSPI_NESTSIID.exe.config,.,16
+HSPI_NESTSIID.zip,[UNZIPOVER],./Bin/
