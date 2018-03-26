@@ -3,4 +3,4 @@ userprefs.txt,.\Data\hspi_nestsiid,16
 debug.txt,.\Data\hspi_nestsiid,16
 HSPI_NESTSIID.exe,.,0
 HSPI_NESTSIID.exe.config,.,16
-HSPI_NESTSIID.zip,[UNZIPOVER],./Bin/
+HSPI_NESTSIID.zip,[UNZIPOVER],./bin/
