@@ -101,27 +101,24 @@ namespace HSPI_NESTSIID
                 if (EN == null)
                     throw new Exception(IFACE_NAME + " failed to get a device enumerator from HomeSeer.");
                 int dvRef;
-                string address;
 
                 do
                 {
                     dv = EN.GetNext();
                     if (dv == null)
-                    { continue; }
-                    dvRef = dv.get_Ref(hs);
-                    address = dv.get_Address(hs);
-
-                    if (address.Contains(IFACE_NAME))
-                    {
-                        var ddp = new DeviceDataPoint(dvRef, address, dv);
-                        deviceList.Add(ddp);
-                    }
+                        continue;
+                    if (dv.get_Interface(null) != IFACE_NAME)
+                        continue;
+                    dvRef = dv.get_Ref(null);
+                    
+                    var ddp = new DeviceDataPoint(dvRef, dv);
+                    deviceList.Add(ddp);
 
                 } while (!(EN.Finished));
             }
             catch (Exception ex)
             {
-                hs.WriteLog(IFACE_NAME + " Error", "Exception in Find_Create_Devices/Enumerator: " + ex.Message);
+                Log("Exception in Get_Device_List: " + ex.Message, LogType.LOG_TYPE_ERROR);
             }
 
             return deviceList;
@@ -129,70 +126,67 @@ namespace HSPI_NESTSIID
 
         static internal void Update_ThermostatDevice(Thermostat thermostat, Structures structure, DeviceDataPoint ddPoint)
         {
-            var name = ddPoint.address.Split('-')[5];
+            string name;
+            string id = GetDeviceKeys(ddPoint.device, out name);
 
-            VSVGPairs.VSPair SPair = new VSVGPairs.VSPair(ePairStatusControl.Status);
-
+            /*
             if (name.Contains("thermostat"))    // if the device is a structure thermostat
                 name = "thermostat";
-
+            */
             switch (name)
             {
                 case "Is Online":
                     {
                         if (thermostat.is_online)
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                         }
                         break;
                     }
-
-
 
                 case "HVAC Mode":
                     {
                         switch (thermostat.hvac_mode)
                         {
                             case "off":
-                                hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                                hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                                 break;
                             case "heat-cool":
-                                hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                                hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                                 break;
                             case "cool":
-                                hs.SetDeviceValueByRef(ddPoint.dvRef, 2, false);
+                                hs.SetDeviceValueByRef(ddPoint.dvRef, 2, true);
                                 break;
                             case "heat":
-                                hs.SetDeviceValueByRef(ddPoint.dvRef, 3, false);
+                                hs.SetDeviceValueByRef(ddPoint.dvRef, 3, true);
                                 break;
                             case "eco":
-                                hs.SetDeviceValueByRef(ddPoint.dvRef, 4, false);
+                                hs.SetDeviceValueByRef(ddPoint.dvRef, 4, true);
                                 break;
                         }
                         break;
                     }
                 case "Status":
                     {
-                        hs.SetDeviceString(ddPoint.dvRef, thermostat.hvac_state, false);
+                        hs.SetDeviceString(ddPoint.dvRef, thermostat.hvac_state, true);
                         break;
                     }
                 case "Target Temperature":
                     {
                         if (thermostat.temperature_scale == "F")
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.target_temperature_f, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.target_temperature_f, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.target_temperature_c, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.target_temperature_c, true);
                         }
 
-                        SPair = hs.DeviceVSP_Get(ddPoint.dvRef, -500, ePairStatusControl.Status);
-                        SPair.RangeStatusSuffix = " °" + thermostat.temperature_scale;
+                        ddPoint.device.set_ScaleText(hs, thermostat.temperature_scale);
 
                         break;
                     }
@@ -221,10 +215,8 @@ namespace HSPI_NESTSIID
                                 temp = thermostat.target_temperature_high_c;
                             }
                         }
-                        hs.SetDeviceValueByRef(ddPoint.dvRef, temp, false);
-
-                        SPair = hs.DeviceVSP_Get(ddPoint.dvRef, -500, ePairStatusControl.Status);
-                        SPair.RangeStatusSuffix = " °" + thermostat.temperature_scale;
+                        hs.SetDeviceValueByRef(ddPoint.dvRef, temp, true);
+                        ddPoint.device.set_ScaleText(hs, thermostat.temperature_scale);
 
                         break;
                     }
@@ -253,10 +245,8 @@ namespace HSPI_NESTSIID
                                 temp = thermostat.target_temperature_low_c;
                             }
                         }
-                        hs.SetDeviceValueByRef(ddPoint.dvRef, temp, false);
-
-                        SPair = hs.DeviceVSP_Get(ddPoint.dvRef, -500, ePairStatusControl.Status);
-                        SPair.RangeStatusSuffix = " °" + thermostat.temperature_scale;
+                        hs.SetDeviceValueByRef(ddPoint.dvRef, temp, true);
+                        ddPoint.device.set_ScaleText(hs, thermostat.temperature_scale);
 
                         break;
                     }
@@ -264,37 +254,34 @@ namespace HSPI_NESTSIID
                     {
                         if (thermostat.temperature_scale == "F")
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.ambient_temperature_f, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.ambient_temperature_f, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.ambient_temperature_c, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.ambient_temperature_c, true);
                         }
-
-                        SPair = hs.DeviceVSP_Get(ddPoint.dvRef, -500, ePairStatusControl.Status);
-                        SPair.RangeStatusSuffix = " °" + thermostat.temperature_scale;
+                        ddPoint.device.set_ScaleText(hs, thermostat.temperature_scale);
 
                         break;
                     }
                 case "Humidity":
                     {
-                        hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.humidity, false);
+                        hs.SetDeviceValueByRef(ddPoint.dvRef, thermostat.humidity, true);
                         break;
                     }
                 case "Battery Health":
                     {
                         if (!thermostat.is_using_emergency_heat)
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                         }
                         break;
                     }
             }
-            hs.DeviceVSP_AddPair(ddPoint.dvRef, SPair);
         }
 
         static internal void Update_StructureDevice(Structures structure, DeviceDataPoint ddPoint)
@@ -302,39 +289,40 @@ namespace HSPI_NESTSIID
             switch (structure.away)
             {
                 case "away":
-                    hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                    hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                     break;
                 case "home":
-                    hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                    hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                     break;
             }
         }
 
         static internal void Update_CameraDevice(Camera camera, DeviceDataPoint ddPoint)
         {
-            var name = ddPoint.address.Split('-')[4];
+            string name;
+            string id = GetDeviceKeys(ddPoint.device, out name);
 
             switch (name)
             {
                 case "Web Url":
                     {
-                        hs.SetDeviceString(ddPoint.dvRef, camera.web_url, false);
+                        hs.SetDeviceString(ddPoint.dvRef, camera.web_url, true);
                         break;
                     }
                 case "App Url":
                     {
-                        hs.SetDeviceString(ddPoint.dvRef, camera.app_url, false);
+                        hs.SetDeviceString(ddPoint.dvRef, camera.app_url, true);
                         break;
                     }
                 case "Is Online":
                     {
                         if (camera.is_online)
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                         }
                         break;
                     }
@@ -342,11 +330,11 @@ namespace HSPI_NESTSIID
                     {
                         if (camera.is_streaming)
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 1, true);
                         }
                         else
                         {
-                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, false);
+                            hs.SetDeviceValueByRef(ddPoint.dvRef, 0, true);
                         }
                         break;
                     }
@@ -401,8 +389,7 @@ namespace HSPI_NESTSIID
             }
             catch (Exception ex)
             {
-                hs.WriteLog(IFACE_NAME + " Error", "Exception in Find_Create_Thermostats: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                Log("Exception in Find_Create_Thermostats: " + ex.Message, LogType.LOG_TYPE_ERROR);
                 System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
             }
             return associates;
@@ -435,8 +422,7 @@ namespace HSPI_NESTSIID
             }
             catch (Exception ex)
             {
-                hs.WriteLog(IFACE_NAME + " Error", "Exception in Find_Create_Thermostats: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                Log("Exception in Find_Create_Structures: " + ex.Message, LogType.LOG_TYPE_ERROR);
                 System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
             }
 
@@ -466,17 +452,20 @@ namespace HSPI_NESTSIID
             }
             catch (Exception ex)
             {
-                hs.WriteLog(IFACE_NAME + " Error", "Exception in Find_Create_Cameras: " + ex.Message);
+                Log("Exception in Find_Create_Cameras: " + ex.Message, LogType.LOG_TYPE_ERROR);
             }
             return associates;
         }
 
         static internal bool Thermostat_Devices(string tString, Thermostat thermostat, Structures structure, List<DeviceDataPoint> deviceList)
         {
+            string name;
+            string id;
 
             foreach (var ddPoint in deviceList)
             {
-                if (ddPoint.address.Contains(IFACE_NAME + "-" + thermostat.device_id + "-" + thermostat.name_long + "-" + tString))
+                id = GetDeviceKeys(ddPoint.device, out name);
+                if (id == thermostat.device_id && name == tString)
                 {
                     Update_ThermostatDevice(thermostat, structure, ddPoint);
                     return false;
@@ -486,11 +475,15 @@ namespace HSPI_NESTSIID
             DeviceClass dv = new DeviceClass();
             dv = GenericHomeSeerDevice(dv, tString, thermostat.name_long, thermostat.device_id, tString.Equals("Is Online"));
             var dvRef = dv.get_Ref(hs);
-            var name = dv.get_Address(hs).Split('-')[5];
+            id = GetDeviceKeys(dv, out name);
             switch (name)
             {
                 case "Is Online":
                     {
+                        DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                        dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                        dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Root;
+                        dv.set_DeviceType_Set(hs, dt);
                         dv.set_Relationship(hs, Enums.eRelationship.Parent_Root);
                         dv.MISC_Set(hs, Enums.dvMISC.STATUS_ONLY);
 
@@ -520,6 +513,11 @@ namespace HSPI_NESTSIID
                 case "HVAC Mode":
                     {
                         dv.MISC_Set(hs, Enums.dvMISC.SHOW_VALUES);
+                        DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                        dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                        dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Mode_Set;
+                        dt.Device_SubType = 0;
+                        dv.set_DeviceType_Set(hs, dt);
 
                         VSVGPairs.VSPair SPair = default(VSVGPairs.VSPair);
                         SPair = new VSVGPairs.VSPair(ePairStatusControl.Both);
@@ -529,6 +527,7 @@ namespace HSPI_NESTSIID
                         SPair.Status = "Off";
                         SPair.Render_Location.Row = 1;
                         SPair.Render_Location.Column = 1;
+                        SPair.ControlUse = ePairControlUse._ThermModeOff;
                         hs.DeviceVSP_AddPair(dvRef, SPair);
 
                         VSVGPairs.VGPair GPair = new VSVGPairs.VGPair();
@@ -543,6 +542,7 @@ namespace HSPI_NESTSIID
                             SPair.Status = "Auto";
                             SPair.Render_Location.Row = 1;
                             SPair.Render_Location.Column = 2;
+                            SPair.ControlUse = ePairControlUse._ThermModeAuto;
                             hs.DeviceVSP_AddPair(dvRef, SPair);
 
                             GPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
@@ -557,6 +557,7 @@ namespace HSPI_NESTSIID
                             SPair.Status = "Cool";
                             SPair.Render_Location.Row = 1;
                             SPair.Render_Location.Column = 2;
+                            SPair.ControlUse = ePairControlUse._ThermModeCool;
                             hs.DeviceVSP_AddPair(dvRef, SPair);
 
                             GPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
@@ -571,6 +572,7 @@ namespace HSPI_NESTSIID
                             SPair.Status = "Heat";
                             SPair.Render_Location.Row = 1;
                             SPair.Render_Location.Column = 2;
+                            SPair.ControlUse = ePairControlUse._ThermModeHeat;
                             hs.DeviceVSP_AddPair(dvRef, SPair);
 
                             GPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
@@ -583,6 +585,7 @@ namespace HSPI_NESTSIID
                         SPair.Status = "Eco";
                         SPair.Render_Location.Row = 1;
                         SPair.Render_Location.Column = 2;
+                        SPair.ControlUse = ePairControlUse.Not_Specified;
                         hs.DeviceVSP_AddPair(dvRef, SPair);
 
                         GPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
@@ -599,9 +602,10 @@ namespace HSPI_NESTSIID
                         VSVGPairs.VSPair SPair = default(VSVGPairs.VSPair);
                         SPair = new VSVGPairs.VSPair(ePairStatusControl.Status);
                         SPair.PairType = VSVGPairs.VSVGPairType.Range;
-                        SPair.RangeStart = -500;
-                        SPair.RangeEnd = 500;
-                        SPair.RangeStatusSuffix = " ";
+                        SPair.RangeStart = -100;
+                        SPair.RangeEnd = 150;
+                        SPair.RangeStatusSuffix = " °" + VSVGPairs.VSPair.ScaleReplace;
+                        SPair.HasScale = true;
                         hs.DeviceVSP_AddPair(dvRef, SPair);
 
                         if (name.Equals("Target Temperature") || name.Equals("Target Temperature High") || name.Equals("Target Temperature Low"))
@@ -614,15 +618,40 @@ namespace HSPI_NESTSIID
                             SPair.Render_Location.Row = 1;
                             SPair.Render_Location.Column = 1;
                             SPair.Status = "Enter target:";
-                            SPair.RangeStart = -500;
-                            SPair.RangeEnd = 500;
+                            SPair.RangeStart = 0;
+                            SPair.RangeEnd = 100;
+                            if (name.Equals("Target Temperature Low"))
+                            {
+                                SPair.ControlUse = ePairControlUse._HeatSetPoint;
+                                DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                                dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                                dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Setpoint;
+                                dt.Device_SubType = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceSubType_Setpoint.Heating_1;
+                                dv.set_DeviceType_Set(hs, dt);
+                            }
+                            else if (name.Equals("Target Temperature High"))
+                            {
+                                SPair.ControlUse = ePairControlUse._CoolSetPoint;
+                                DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                                dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                                dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Setpoint;
+                                dt.Device_SubType = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceSubType_Setpoint.Cooling_1;
+                                dv.set_DeviceType_Set(hs, dt);
+                            }
                             hs.DeviceVSP_AddPair(dvRef, SPair);
+                        }
+                        else if(name.Equals("Ambient Temperature"))
+                        {
+                            DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                            dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                            dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Temperature;
+                            dv.set_DeviceType_Set(hs, dt);
                         }
 
                         VSVGPairs.VGPair GPair = new VSVGPairs.VGPair();
                         GPair.PairType = VSVGPairs.VSVGPairType.Range;
-                        GPair.RangeStart = -500;
-                        GPair.RangeEnd = 500;
+                        GPair.RangeStart = -100;
+                        GPair.RangeEnd = 150;
                         GPair.Graphic = "/images/HomeSeer/contemporary/thermometer-70.png";
                         hs.DeviceVGP_AddPair(dvRef, GPair);
 
@@ -641,6 +670,12 @@ namespace HSPI_NESTSIID
 
                 case "Humidity":
                     {
+                        DeviceTypeInfo_m.DeviceTypeInfo dt = new DeviceTypeInfo_m.DeviceTypeInfo();
+                        dt.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Thermostat;
+                        dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Temperature;
+                        dt.Device_SubType = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceSubType_Temperature.Humidity;
+                        dv.set_DeviceType_Set(hs, dt);
+
                         VSVGPairs.VSPair SPair = default(VSVGPairs.VSPair);
                         SPair = new VSVGPairs.VSPair(ePairStatusControl.Status);
                         SPair.PairType = VSVGPairs.VSVGPairType.Range;
@@ -693,21 +728,23 @@ namespace HSPI_NESTSIID
 
         static internal bool Structure_Devices(Structures structure, string thermId, List<DeviceDataPoint> deviceList)
         {
+            string name;
+            string id;
 
             foreach (var ddPoint in deviceList)
             {
-                if (ddPoint.address.Contains(IFACE_NAME + "-" + thermId + "-" + structure.name + "-Structure"))
+                id = GetDeviceKeys(ddPoint.device, out name);
+                if (id == thermId && name == "Structure")
                 {
                     Update_StructureDevice(structure, ddPoint);
                     return false;
                 }
             }
 
-
             DeviceClass dv = new DeviceClass();
             dv = GenericHomeSeerDevice(dv, "Structure", structure.name, thermId, false);
             var dvRef = dv.get_Ref(hs);
-            var name = dv.get_Address(hs).Split('-')[5];
+            id = GetDeviceKeys(dv, out name);
 
             dv.MISC_Set(hs, Enums.dvMISC.SHOW_VALUES);
 
@@ -750,11 +787,13 @@ namespace HSPI_NESTSIID
         }
         static internal bool Camera_Devices(string cString, Camera camera, List<DeviceDataPoint> deviceList)
         {
-
+            string name;
+            string id;
 
             foreach (var ddPoint in deviceList)
             {
-                if (ddPoint.address.Contains(IFACE_NAME + "-" + camera.device_id + "-" + camera.name_long + "-" + cString))
+                id = GetDeviceKeys(ddPoint.device, out name);
+                if (id == camera.device_id && name == cString)
                 {
                     Update_CameraDevice(camera, ddPoint);
                     return false;
@@ -764,7 +803,7 @@ namespace HSPI_NESTSIID
             DeviceClass dv = new DeviceClass();
             dv = GenericHomeSeerDevice(dv, cString, camera.name_long, camera.device_id, cString.Equals("Is Streaming"));
             var dvRef = dv.get_Ref(hs);
-            var name = dv.get_Address(hs).Split('-')[4];
+            id = GetDeviceKeys(dv, out name);
             switch (name)
             {
                 case "Is Streaming":
@@ -807,10 +846,33 @@ namespace HSPI_NESTSIID
             return true;
         }
 
+        static internal string GetDeviceKeys(DeviceClass dev, out string name)
+        {
+            string id = "";
+            name = "";
+            PlugExtraData.clsPlugExtraData pData = dev.get_PlugExtraData_Get(hs);
+            if (pData != null)
+            {
+                id = (string)pData.GetNamed("id");
+                name = (string)pData.GetNamed("name");
+            }
+            return id;
+        }
+
+        static internal void SetDeviceKeys(DeviceClass dev, string id, string name)
+        {
+            PlugExtraData.clsPlugExtraData pData = dev.get_PlugExtraData_Get(hs);
+            if (pData == null)
+                pData = new PlugExtraData.clsPlugExtraData();
+            pData.AddNamed("id", id);
+            pData.AddNamed("name", name);
+            dev.set_PlugExtraData_Set(hs, pData);
+        }
+
         static internal DeviceClass GenericHomeSeerDevice(DeviceClass dv, string dvName, string dvName_long, string device_id, bool root)
         {
             int dvRef;
-            Console.WriteLine("Creating Device: " + dvName_long + " " + dvName);
+            Log("Creating Device: " + dvName_long + " " + dvName, LogType.LOG_TYPE_INFO);
             var DT = new DeviceTypeInfo_m.DeviceTypeInfo();
             DT.Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In;
             if (root)
@@ -821,8 +883,9 @@ namespace HSPI_NESTSIID
             hs.NewDeviceRef(dvName_long + " " + dvName);
             dvRef = hs.GetDeviceRefByName(dvName_long + " " + dvName);
             dv = (DeviceClass)hs.GetDeviceByRef(dvRef);
-            dv.set_Address(hs, IFACE_NAME);
-            dv.set_Code(hs, device_id + "-" + dvName_long + "-" + dvName);
+            dv.set_Address(hs, "");
+            SetDeviceKeys(dv, device_id, dvName);
+            //dv.set_Code(hs, device_id + "-" + dvName_long + "-" + dvName);
             if (dvName_long.Contains("Camera"))
             {
                 dv.set_Location(hs, "Camera");
@@ -932,43 +995,46 @@ namespace HSPI_NESTSIID
         static internal void SetAssociatedDevices()
         {
             var deviceList = new List<DeviceDataPoint>();
+            string name;
+            string id;
 
             deviceList = Get_Device_List(deviceList);
             foreach (var ddPoint in deviceList)
             {
-                var address = ddPoint.address.Split('-');   //[0]IFACE_NAME,[1]device_id,[2]more device_id[3],name_long,[4]property
 
-                if (address[3].Contains("Camera") && address[4].Contains("Is Streaming"))
+                id = GetDeviceKeys(ddPoint.device, out name);
+
+                if (name == "Is Streaming")
                 {
                     for (int i = 1; i < 3; i++)   // Now it's time to find the associate devices using the presumed addresses (IFACE_NAME-cString) in DeviceStrings[4-1]
                     {
                         foreach (var aDDPoint in deviceList)
                         {
-                            if (aDDPoint.address.Contains(IFACE_NAME + "-" + address[1] + "-" + address[2] + "-" + address[3] + "-" + getCameraStrings()[i]))
+                            string aName;
+                            string aId = GetDeviceKeys(aDDPoint.device, out aName);
+                            if (aId == id &&  aName == getCameraStrings()[i])
                             {
                                 ddPoint.device.AssociatedDevice_Add(hs, aDDPoint.dvRef);
-
                             }
                         }
                     }
 
                 }
-                foreach (var item in address)
-                {
-
-                }
-                if (address[4].Contains("Thermostat") && address[5].Equals("Is Online"))
+                if (name == "Is Online")
                 {
                     for (int i = 1; i < 9; i++)   // Now it's time to find the associate devices using the presumed addresses (IFACE_NAME-cString) in DeviceStrings[4-1]
                     {
                         foreach (var aDDPoint in deviceList)
                         {
-                            if (aDDPoint.address.Contains(IFACE_NAME + "-" + address[1] + "-" + address[2] + "-" + address[3] + "-" + address[4] + "-" + getThermostatStrings()[i]))
+                            string aName;
+                            string aId = GetDeviceKeys(aDDPoint.device, out aName);
+
+                            if (aId == id && aName == getThermostatStrings()[i])
                             {
                                 ddPoint.device.AssociatedDevice_Add(hs, aDDPoint.dvRef);
 
                             }
-                            if (aDDPoint.address.Contains("Structure") && aDDPoint.address.Contains(address[1] + "-" + address[2] + "-" + address[3]))
+                            if (aId == id && aName == "Structure")
                             {
                                 ddPoint.device.AssociatedDevice_Add(hs, aDDPoint.dvRef);
                             }

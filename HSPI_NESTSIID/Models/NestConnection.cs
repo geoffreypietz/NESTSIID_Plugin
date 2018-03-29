@@ -23,10 +23,10 @@ namespace HSPI_NESTSIID.Models
 
         public void setInitialConnectionProps()
         {
-            string userPrefs = System.IO.File.ReadAllText(@"Data/hspi_nestsiid/userprefs.txt");
-            using (var Login = JsonConvert.DeserializeObject<Login>(userPrefs))
+            string json = Util.hs.GetINISetting("NEST", "login", "", Util.IFACE_NAME + ".ini");
+            using (var Login = JsonConvert.DeserializeObject<Login>(json))
             {
-                access_token = Login.access_token; 
+                access_token = Login?.access_token; 
             }
         }
 
@@ -54,7 +54,7 @@ namespace HSPI_NESTSIID.Models
             using (var login = new Login(access_token))
             {
                 string json = JsonConvert.SerializeObject(login);
-                System.IO.File.WriteAllText(@"Data/hspi_nestsiid/userprefs.txt", json); 
+                Util.hs.SaveINISetting("NEST", "login", json, Util.IFACE_NAME + ".ini"); 
             }
         }
 
@@ -101,7 +101,7 @@ namespace HSPI_NESTSIID.Models
                 }
                 catch (Exception e)
                 {
-                    Util.hs.WriteLog(Util.IFACE_NAME + " Error", e.ToString());
+                    Util.Log( e.ToString(), Util.LogType.LOG_TYPE_ERROR);
                     return false;
                 }
             }
@@ -189,7 +189,10 @@ namespace HSPI_NESTSIID.Models
                 client.BaseUrl = new System.Uri(newPath);
                 initial_response = client.Execute(request);
                 //System.IO.File.WriteAllText(@"Data/hspi_nestsiid/setapi2.txt", initial_response.Content);
-                Console.WriteLine(initial_response.Content);
+                if(initial_response.StatusCode != HttpStatusCode.OK)
+                {
+                    Util.Log(initial_response.Content, Util.LogType.LOG_TYPE_WARNING);
+                }
             }
         }
         // Disposable Interface

@@ -30,7 +30,7 @@ namespace HSPI_NESTSIID
                 pin_code = parts["pin_code"];
                 Console.WriteLine(pin_code);
             }
-            if (parts["id"].Contains("access_button"))
+            if (parts["id"] != null && parts["id"].Contains("access_button"))
             {
                 using (var nest = new NestConnection())
                 {
@@ -82,7 +82,7 @@ namespace HSPI_NESTSIID
                 }*/
 
                 this.AddHeader(Util.hs.GetPageHeader(pageName, Util.IFACE_NAME, "", "", false, true));
-                pluginSB.Append("<link rel = 'stylesheet' href = 'hspi_nestsiid/css/style.css' type = 'text/css' /><br>");
+                //pluginSB.Append("<link rel = 'stylesheet' href = 'hspi_nestsiid/css/style.css' type = 'text/css' /><br>");
                 //page.AddHeader(pluginSB.ToString());
 
 
@@ -99,11 +99,13 @@ namespace HSPI_NESTSIID
 
 
 
-                pluginSB.Append(clsPageBuilder.DivStart("pluginpage", ""));
+                //pluginSB.Append(clsPageBuilder.DivStart("pluginpage", ""));
                 //Dim dv As DeviceClass = GetDeviceByRef(3576)
                 //Dim CS As CAPIStatus
                 //CS = dv.GetStatus
 
+                pluginSB.AppendLine("<table class='full_width_table' cellspacing='0' width='100%' >");
+                pluginSB.AppendLine("<tr><td  colspan='1' >");
                 // Status/Options Tabs
 
                 clsJQuery.jqTabs jqtabs = new clsJQuery.jqTabs("optionsTab", this.PageName);
@@ -120,24 +122,24 @@ namespace HSPI_NESTSIID
 
                 var optionsString = new StringBuilder();
                 optionsString.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("myform1", "testpage", "post"));
-                optionsString.Append("<table id='optionstable'>");
-                optionsString.Append("<tr><td class='header' colspan='2'>Follow the inputs below to retrieve/reset your API access token</td></tr>");
+                optionsString.Append("<table>");
+                optionsString.Append("<tr><td class='tableheader' colspan='2'>Follow the inputs below to retrieve/reset your API access token</td></tr>");
 
                 // Nest API Access Token
-                optionsString.Append("<tr><td class='header' colspan='2'>Nest API Access Token</td></tr>");
+                optionsString.Append("<tr><td class='tableheader' colspan='2'>Nest API Access Token</td></tr>");
 
-                optionsString.Append("<tr><td>Follow the Retrieve Pin-Code link to obtain a pin-code</td>");
-                optionsString.Append("<td>");
+                optionsString.Append("<tr><td class='tablecell'>Follow the Retrieve Pin-Code link to obtain a pin-code</td>");
+                optionsString.Append("<td class='tablecell'>");
                 optionsString = BuildLinkButton(optionsString, "pin_button", "Retrieve Pin-Code", "https://home.nest.com/login/oauth2?client_id=7ba01588-498d-4f20-a524-14c3c8f9134a&state=STATE");
                 optionsString.Append("</td></tr>");
 
-                optionsString.Append("<tr><td>Copy the Pin-Code into this box</td>");
-                optionsString.Append("<td>");
+                optionsString.Append("<tr><td class='tablecell'>Copy the Pin-Code into this box</td>");
+                optionsString.Append("<td class='tablecell'>");
                 optionsString = BuildTextBox(optionsString, "pin_code", "Pin-Code", "Pin-Code", "", 200);
                 optionsString.Append("</td></tr>");
 
-                optionsString.Append("<tr><td>Hit the Reset button to renew your access token</td>");
-                optionsString.Append("<td>");
+                optionsString.Append("<tr><td class='tablecell'>Hit the Reset button to renew your access token</td>");
+                optionsString.Append("<td class='tablecell'>");
                 optionsString = BuildLinkButton(optionsString, "access_button", "Reset Access-Token", "");
                 optionsString.Append("</td></tr>");
                
@@ -151,6 +153,7 @@ namespace HSPI_NESTSIID
                 jqtabs.tabs.Add(tab);
 
                 pluginSB.Append(jqtabs.Build());
+                pluginSB.AppendLine("</td></tr></table>");
             }
             catch (Exception ex)
             {
