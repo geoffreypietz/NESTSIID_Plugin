@@ -1,5 +1,5 @@
 'Name,  			Updater version, 	File version, 	Notices version
-HomeSeer Updates File,		3.0.318.0,		87,		1
+HomeSeer Updates File,		3.0.0.5,		87,		1
 homeseer.com,anonymous,user@updates,updates3,,,0.0.0.0
 
 '    UC = Use Code, bit 1 = S, bit 2 = PS, bit 4 = HW bit 8 = HomeTroller 16 = Windows 32 = Linux  (bit mapped)
@@ -9,7 +9,7 @@ homeseer.com,anonymous,user@updates,updates3,,,0.0.0.0
 '    PC = Provider Code,  1 = HS, 2 = 3RD Party
 
 
-%<HS TYPE=CARTURL>http://shop.homeseer.com/products/<SKU>
+%<HS TYPE=CARTURL>http://store.homeseer.com/store/ProductId=<SKU>
 
 'the next line is a top level category, if all of these lines are commented out then HS will display only the categories
 '%HomeSeer Updates Line
@@ -27,5 +27,4 @@ homeseer.com,anonymous,user@updates,updates3,,,0.0.0.0
 
 %<HS TYPE=SUBCAT>NESTSIID Plugin
 ' -------------------------------------------------------------
-NESTSIID, 	HSPI_NESTSIID.exe,		,0.9.6381.30587,	 63, 2, local, Zips,	NestSIID-0.9.6381.30587.zip,	4,	Free,			Siemens,					NESTSIID,					,						,,
-
+NESTSIID, 			HSPI_NESTSIID.exe,		,3.0.3.0,	 63, 2, local,,	NestSIID-3.0.3.0.zip,	4,	Free,			Siemens,		        NESTSIID,			,,,	 

@@ -182,8 +182,7 @@ namespace HSPI_NESTSIID
 
                         else
                         {
-                            Console.WriteLine("Access Token is null");
-                            Util.hs.WriteLog(Util.IFACE_NAME + " Error", "Access Token is null");
+                            Util.Log( "Access Token is null", Util.LogType.LOG_TYPE_ERROR);
                             running = false;
                         }
                     } 
@@ -191,7 +190,8 @@ namespace HSPI_NESTSIID
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed: No API Key?");
+                //Console.WriteLine("Failed: No API Key?");
+                Util.Log(ex.ToString(), Util.LogType.LOG_TYPE_ERROR);
                 System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
                 if(ex.ToString().Contains("connectNestData"))
                 {
@@ -282,7 +282,7 @@ namespace HSPI_NESTSIID
                 // register a generic Util.callback for other plugins to raise to use
                 Util.callback.RegisterGenericEventCB("sample_type", Util.IFACE_NAME, "");
 
-                Util.hs.WriteLog(Util.IFACE_NAME, "InitIO called, plug-in is being initialized...");
+                Util.Log( "InitIO called, plug-in is being initialized...", Util.LogType.LOG_TYPE_INFO);
 
 
 
@@ -414,168 +414,160 @@ namespace HSPI_NESTSIID
         {
             foreach (var CC in colSend)
             {
-                Console.WriteLine("SetIOMulti set value: " + CC.ControlValue.ToString() + "->ref:" + CC.Ref.ToString());
-                using (var nest = new NestConnection())
+                try
                 {
-                    nest.setInitialConnectionProps();
-                    DeviceClass dv = (DeviceClass)Util.hs.GetDeviceByRef(CC.Ref);
+                    Util.Log("SetIOMulti set value: " + CC.ControlValue.ToString() + "->ref:" + CC.Ref.ToString(), Util.LogType.LOG_TYPE_INFO);
+                    using (var nest = new NestConnection())
+                    {
+                        nest.setInitialConnectionProps();
+                        DeviceClass dv = (DeviceClass)Util.hs.GetDeviceByRef(CC.Ref);
 
-                        var id = dv.get_Address(Util.hs).Split('-');
+                        string name;
+                        string id = Util.GetDeviceKeys(dv, out name);
 
-                        if (id[3].Contains("Camera"))
+                        if (name == "Is Streaming")
                         {
                             if (CC.Label == "On")
                             {
-                                nest.setApiJson("{\"is_streaming\": true}", "devices/cameras", id[1] + "-" + id[2]);
-                                Util.hs.SetDeviceValueByRef(CC.Ref, 1, false);
+                                nest.setApiJson("{\"is_streaming\": true}", "devices/cameras", id);
+                                //Util.hs.SetDeviceValueByRef(CC.Ref, 1, true);
                             }
                             if (CC.Label == "Off")
                             {
-                                nest.setApiJson("{\"is_streaming\": false}", "devices/cameras", id[1] + "-" + id[2]);
-                                Util.hs.SetDeviceValueByRef(CC.Ref, 0, false);
+                                nest.setApiJson("{\"is_streaming\": false}", "devices/cameras", id);
+                                //Util.hs.SetDeviceValueByRef(CC.Ref, 0, true);
                             }
                         }
-                        if (id[4].Contains("Thermostat"))
+                        if (name == "HVAC Mode")
                         {
-                            //Console.WriteLine(id[4]);
-                            //Console.WriteLine(id[5]);
-                            if (id[5].Contains("HVAC Mode"))
+                            if (CC.Label.Equals("Auto"))
                             {
-                                if(CC.Label.Equals("Auto"))
-                                {
-                                    nest.setApiJson("{\"hvac_mode\": \"" + "heat-cool" + "\"}", "devices/thermostats", id[1] + "-" + id[2] + "-" + id[3]);
-                                }
-                                else
-                                {
-                                    nest.setApiJson("{\"hvac_mode\": \"" + CC.Label.ToLower() + "\"}", "devices/thermostats", id[1] + "-" + id[2] + "-" + id[3]);
-                                }
-                                
-
-                                if (CC.Label.Equals("Off"))
-                                {
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 0, false);
-                                }
-                                if (CC.Label.Equals("Auto"))
-                                {
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 1, false);
-                                }
-                                if (CC.Label.Equals("Cool"))
-                                {
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 2, false);
-                                }
-                                if (CC.Label.Equals("Heat"))
-                                {
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 3, false);
-                                }
-                                if (CC.Label.Equals("Eco"))
-                                {
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 4, false);
-                                }
+                                nest.setApiJson("{\"hvac_mode\": \"" + "heat-cool" + "\"}", "devices/thermostats", id);
+                            }
+                            else
+                            {
+                                nest.setApiJson("{\"hvac_mode\": \"" + CC.Label.ToLower() + "\"}", "devices/thermostats", id);
                             }
 
-                            if (id[5].Contains("Temperature"))
+                            /*
+                            if (CC.Label.Equals("Off"))
                             {
-                                try
+                                Util.hs.SetDeviceValueByRef(CC.Ref, 0, true);
+                            }
+                            if (CC.Label.Equals("Auto"))
+                            {
+                                Util.hs.SetDeviceValueByRef(CC.Ref, 1, true);
+                            }
+                            if (CC.Label.Equals("Cool"))
+                            {
+                                Util.hs.SetDeviceValueByRef(CC.Ref, 2, true);
+                            }
+                            if (CC.Label.Equals("Heat"))
+                            {
+                                Util.hs.SetDeviceValueByRef(CC.Ref, 3, true);
+                            }
+                            if (CC.Label.Equals("Eco"))
+                            {
+                                Util.hs.SetDeviceValueByRef(CC.Ref, 4, true);
+                            }
+                            */
+                        }
+
+                        if (name.Contains("Temperature"))
+                        {
+                            using (var nestData = nest.getNestData())
+                            {
+                                var currentTemp = dv.get_devValue(Util.hs);
+
+                                var targetWithScale = "";
+                                foreach (var thermostat in nestData.Devices.thermostats)
                                 {
-                                    using (var nestData = nest.getNestData())
+                                    //Console.WriteLine(thermostat.Value.hvac_mode);
+                                    //Console.WriteLine(id[5]);
+
+                                    if (!thermostat.Value.hvac_mode.Equals("eco"))
                                     {
-                                        var currentTemp = dv.get_devValue(Util.hs);
-
-                                        var targetWithScale = "";
-                                        foreach (var thermostat in nestData.Devices.thermostats)
+                                        if (name == "Target Temperature")
                                         {
-                                            //Console.WriteLine(thermostat.Value.hvac_mode);
-                                            //Console.WriteLine(id[5]);
-
-                                            if (!thermostat.Value.hvac_mode.Equals("eco"))
+                                            if (thermostat.Value.temperature_scale.Equals("F"))
                                             {
-                                                if (id[5].Equals("Target Temperature"))
-                                                {
-                                                    if (thermostat.Value.temperature_scale.Equals("F"))
-                                                    {
-                                                        targetWithScale = "target_temperature_f";
-                                                    }
-                                                    else
-                                                    {
-                                                        targetWithScale = "target_temperature_c";
-                                                    }
-
-                                                }
-                                                if (id[5].Equals("Target Temperature Low"))
-                                                {
-                                                    if (thermostat.Value.temperature_scale.Equals("F"))
-                                                    {
-                                                        targetWithScale = "target_temperature_low_f";
-                                                        currentTemp = thermostat.Value.target_temperature_low_f;
-                                                    }
-                                                    else
-                                                    {
-                                                        targetWithScale = "target_temperature_low_c";
-                                                        currentTemp = thermostat.Value.target_temperature_low_c;
-                                                    }
-                                                }
-                                                if (id[5].Equals("Target Temperature High"))
-                                                {
-                                                    if (thermostat.Value.temperature_scale.Equals("F"))
-                                                    {
-                                                        targetWithScale = "target_temperature_high_f";
-                                                        currentTemp = thermostat.Value.target_temperature_high_f;
-                                                    }
-                                                    else
-                                                    {
-                                                        targetWithScale = "target_temperature_high_c";
-                                                        currentTemp = thermostat.Value.target_temperature_high_c;
-                                                    }
-                                                }
+                                                targetWithScale = "target_temperature_f";
                                             }
                                             else
                                             {
+                                                targetWithScale = "target_temperature_c";
+                                            }
 
-                                                if (id[5].Equals("Target Temperature Low"))
-                                                {
-                                                    if (thermostat.Value.temperature_scale.Equals("F"))
-                                                    {
-                                                        targetWithScale = "eco_temperature_low_f";
-                                                        currentTemp = thermostat.Value.eco_temperature_low_f;
-                                                    }
-                                                    else
-                                                    {
-                                                        targetWithScale = "eco_temperature_low_c";
-                                                        currentTemp = thermostat.Value.eco_temperature_low_c;
-                                                    }
-                                                }
-                                                if (id[5].Equals("Target Temperature High"))
-                                                {
-                                                    if (thermostat.Value.temperature_scale.Equals("F"))
-                                                    {
-                                                        targetWithScale = "eco_temperature_high_f";
-                                                        currentTemp = thermostat.Value.eco_temperature_high_f;
-                                                    }
-                                                    else
-                                                    {
-                                                        targetWithScale = "eco_temperature_high_c";
-                                                        currentTemp = thermostat.Value.eco_temperature_high_c;
-                                                    }
-                                                }
+                                        }
+                                        if (name == "Target Temperature Low")
+                                        {
+                                            if (thermostat.Value.temperature_scale.Equals("F"))
+                                            {
+                                                targetWithScale = "target_temperature_low_f";
+                                                currentTemp = thermostat.Value.target_temperature_low_f;
+                                            }
+                                            else
+                                            {
+                                                targetWithScale = "target_temperature_low_c";
+                                                currentTemp = thermostat.Value.target_temperature_low_c;
                                             }
                                         }
-                                        nest.setApiJson("{\"" + targetWithScale + "\": " + CC.ControlValue + "}", "devices/thermostats", id[1] + "-" + id[2] + "-" + id[3]); 
+                                        if (name == "Target Temperature High")
+                                        {
+                                            if (thermostat.Value.temperature_scale.Equals("F"))
+                                            {
+                                                targetWithScale = "target_temperature_high_f";
+                                                currentTemp = thermostat.Value.target_temperature_high_f;
+                                            }
+                                            else
+                                            {
+                                                targetWithScale = "target_temperature_high_c";
+                                                currentTemp = thermostat.Value.target_temperature_high_c;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        if (name == "Target Temperature Low")
+                                        {
+                                            if (thermostat.Value.temperature_scale.Equals("F"))
+                                            {
+                                                targetWithScale = "eco_temperature_low_f";
+                                                currentTemp = thermostat.Value.eco_temperature_low_f;
+                                            }
+                                            else
+                                            {
+                                                targetWithScale = "eco_temperature_low_c";
+                                                currentTemp = thermostat.Value.eco_temperature_low_c;
+                                            }
+                                        }
+                                        if (name == "Target Temperature High")
+                                        {
+                                            if (thermostat.Value.temperature_scale.Equals("F"))
+                                            {
+                                                targetWithScale = "eco_temperature_high_f";
+                                                currentTemp = thermostat.Value.eco_temperature_high_f;
+                                            }
+                                            else
+                                            {
+                                                targetWithScale = "eco_temperature_high_c";
+                                                currentTemp = thermostat.Value.eco_temperature_high_c;
+                                            }
+                                        }
                                     }
                                 }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e);
-                                }
+                                nest.setApiJson("{\"" + targetWithScale + "\": " + CC.ControlValue + "}", "devices/thermostats", id);
                             }
                         }
-                        if (id[5].Contains("Structure"))
+                        if (name == "Structure")
                         {
                             var structId = "";
                             using (var nestData = nest.getNestData())
                             {
                                 foreach (var structure in nestData.Structures)
                                 {
-                                    if (structure.Value.name.Equals(id[4]))
+                                    if (structure.Value.thermostats.Contains(id))
                                     {
                                         structId = structure.Value.structure_id;
                                     }
@@ -585,22 +577,23 @@ namespace HSPI_NESTSIID
                                 if (CC.Label == "Away")
                                 {
                                     jsonValue = "away";
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 0, false);
+                                    //Util.hs.SetDeviceValueByRef(CC.Ref, 0, true);
                                 }
                                 if (CC.Label == "Home")
                                 {
                                     jsonValue = "home";
-                                    Util.hs.SetDeviceValueByRef(CC.Ref, 1, false);
+                                    //Util.hs.SetDeviceValueByRef(CC.Ref, 1, true);
                                 }
-
-
                                 Console.WriteLine("{\"away\": \"" + jsonValue + "\"}");
 
-                                nest.setApiJson("{\"away\": \"" + jsonValue + "\"}", "structures", structId); 
+                                nest.setApiJson("{\"away\": \"" + jsonValue + "\"}", "structures", structId);
                             }
                         }
-
-                    
+                    }
+                }
+                catch (Exception e)
+                {
+                    Util.Log(e.ToString(), Util.LogType.LOG_TYPE_ERROR);
                 }
             }
         }
