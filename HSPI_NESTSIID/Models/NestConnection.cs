@@ -140,7 +140,7 @@ namespace HSPI_NESTSIID.Models
 
         public NestData getNestData()
         {
-            var client = new RestClient("https://developer-api.nest.com/");
+            var client = new RestClient("");
             client.FollowRedirects = false;
 
             var request = getRequestGetOrPut(Method.GET, null, false);

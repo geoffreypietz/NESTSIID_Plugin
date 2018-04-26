@@ -485,6 +485,7 @@ namespace HSPI_NESTSIID
                         dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceType_Thermostat.Root;
                         dv.set_DeviceType_Set(hs, dt);
                         dv.set_Relationship(hs, Enums.eRelationship.Parent_Root);
+                        dv.set_Device_Type_String(hs, "Nest Root Thermostat");
                         dv.MISC_Set(hs, Enums.dvMISC.STATUS_ONLY);
 
                         VSVGPairs.VSPair SPair = default(VSVGPairs.VSPair);
@@ -752,17 +753,7 @@ namespace HSPI_NESTSIID
             SPair = new VSVGPairs.VSPair(ePairStatusControl.Both);
             SPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
             SPair.Render = Enums.CAPIControlType.Button;
-            /*SPair.Value = 0;
-            SPair.Status = "User Program";
-            SPair.Render_Location.Row = 1;
-            SPair.Render_Location.Column = 1;
-            hs.DeviceVSP_AddPair(dvRef, SPair);
-
-            SPair.Value = 1;
-            SPair.Status = "Away-Auto";
-            SPair.Render_Location.Row = 1;
-            SPair.Render_Location.Column = 2;
-            hs.DeviceVSP_AddPair(dvRef, SPair);*/
+ 
 
             SPair.Value = 0;
             SPair.Status = "Away";
@@ -809,6 +800,7 @@ namespace HSPI_NESTSIID
                 case "Is Streaming":
                     {
                         dv.set_Relationship(hs, Enums.eRelationship.Parent_Root);
+                        dv.set_Device_Type_String(hs, "Nest Root Camera");
                         dv.MISC_Set(hs, Enums.dvMISC.SHOW_VALUES);
 
                         VSVGPairs.VSPair SPair = default(VSVGPairs.VSPair);
@@ -901,6 +893,7 @@ namespace HSPI_NESTSIID
             dv.MISC_Set(hs, Enums.dvMISC.NO_LOG);
             dv.set_DeviceType_Set(hs, DT);
             dv.set_Relationship(hs, Enums.eRelationship.Child);
+            dv.set_Device_Type_String(hs, "Nest Child Device");
             return dv;
         }
 

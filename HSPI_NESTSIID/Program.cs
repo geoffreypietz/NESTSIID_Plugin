@@ -1,8 +1,7 @@
 ﻿using System;
 using HomeSeerAPI;
-
-using HSCF.Communication.Scs.Communication.EndPoints.Tcp;
 using HSCF.Communication.ScsServices.Client;
+using HSCF.Communication.Scs.Communication.EndPoints.Tcp;
 
 namespace HSPI_NESTSIID
 {

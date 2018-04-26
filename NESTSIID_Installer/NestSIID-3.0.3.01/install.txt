@@ -1,0 +1,5 @@
+HSPI_NESTSIID.exe,.,0
+HSPI_NESTSIID.exe.config,.,0
+HSPI_NESTSIID.zip,[UNZIPOVER],./bin/
+debug.txt,.\Data\hspi_nestsiid,16
+NESTSIID.ini,.\Config\,16
