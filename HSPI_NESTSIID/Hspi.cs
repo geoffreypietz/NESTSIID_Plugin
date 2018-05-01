@@ -596,6 +596,7 @@ namespace HSPI_NESTSIID
                     Util.Log(e.ToString(), Util.LogType.LOG_TYPE_ERROR);
                 }
             }
+            updateStatusValues();//after sending a command, update with the new status
         }
 
         public void setHighLowTemps()
