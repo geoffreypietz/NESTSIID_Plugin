@@ -3,7 +3,7 @@ using HomeSeerAPI;
 using HSCF.Communication.ScsServices.Client;
 using HSCF.Communication.Scs.Communication.EndPoints.Tcp;
 
-namespace HSPI_NESTSIID
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 {
     class Program
     {

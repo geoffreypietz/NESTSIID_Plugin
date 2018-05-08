@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace HSPI_NESTSIID.Models
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin.Models
 {
     class NestConnection : IDisposable
     {
@@ -129,9 +129,9 @@ namespace HSPI_NESTSIID.Models
                         newPath = item.Value.ToString();
                     }
                 }
-                //System.IO.File.WriteAllText(@"Data/hspi_nestsiid/setapi.txt", "1");
+                //System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/setapi.txt", "1");
                 var firebaseClient = new FirebaseClient(newPath, new FirebaseOptions { AuthTokenAsyncFactory = () => Task.FromResult(access_token) });
-                //System.IO.File.WriteAllText(@"Data/hspi_nestsiid/setapi.txt", "2");
+                //System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/setapi.txt", "2");
                 var observable = firebaseClient.Child("devices").AsObservable<Devices>().Subscribe(d => Util.Find_Create_Devices(d.Object));
                 var observable2 = firebaseClient.Child("structures").AsObservable<Dictionary<string, Structures>>().Subscribe(d => Util.Find_Create_Structures(d.Object));
                 HSPI.observeRunning = true;           
@@ -158,7 +158,7 @@ namespace HSPI_NESTSIID.Models
                     }
                 }
                 //Console.WriteLine(newPath);
-                System.IO.File.WriteAllText(@"Data/hspi_nestsiid/uri.txt", newPath);
+                System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/uri.txt", newPath);
                 client.BaseUrl = new Uri(newPath);
                 initial_response = client.Execute(request);
 
@@ -188,7 +188,7 @@ namespace HSPI_NESTSIID.Models
                 }
                 client.BaseUrl = new System.Uri(newPath);
                 initial_response = client.Execute(request);
-                //System.IO.File.WriteAllText(@"Data/hspi_nestsiid/setapi2.txt", initial_response.Content);
+                //System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/setapi2.txt", initial_response.Content);
                 if(initial_response.StatusCode != HttpStatusCode.OK)
                 {
                     Util.Log(initial_response.Content, Util.LogType.LOG_TYPE_WARNING);

@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using HomeSeerAPI;
 using Scheduler.Classes;
-using HSPI_NESTSIID.Models;
+using HSPI_Nest_Thermostat_and_Camera_Plugin.Models;
 
-namespace HSPI_NESTSIID
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 {
 
     static class Util
@@ -19,7 +19,7 @@ namespace HSPI_NESTSIID
         public const int ERR_INIT = 2;
         public static HomeSeerAPI.IHSApplication hs;
         public static HomeSeerAPI.IAppCallbackAPI callback;
-        public const string IFACE_NAME = "NESTSIID";
+        public const string IFACE_NAME = "Nest Thermostat and Camera Plugin";
         //public const string IFACE_NAME = "Sample Plugin";
         // set when SupportMultipleInstances is TRUE
         public static string Instance = "";
@@ -390,7 +390,7 @@ namespace HSPI_NESTSIID
             catch (Exception ex)
             {
                 Log("Exception in Find_Create_Thermostats: " + ex.Message, LogType.LOG_TYPE_ERROR);
-                System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
+                System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/debug.txt", ex.ToString());
             }
             return associates;
         }
@@ -423,7 +423,7 @@ namespace HSPI_NESTSIID
             catch (Exception ex)
             {
                 Log("Exception in Find_Create_Structures: " + ex.Message, LogType.LOG_TYPE_ERROR);
-                System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
+                System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/debug.txt", ex.ToString());
             }
 
             if (associates)

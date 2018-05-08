@@ -1,0 +1,5 @@
+HSPI_Nest_Thermostat_and_Camera_Plugin.exe,.,0
+HSPI_Nest_Thermostat_and_Camera_Plugin.exe.config,.,0
+HSPI_Nest_Thermostat_and_Camera_Plugin.zip,[UNZIPOVER],./bin/
+debug.txt,.\Data\HSPI_Nest_Thermostat_and_Camera_Plugin,16
+Nest Thermostat and Camera Plugin.ini,.\Config\,16

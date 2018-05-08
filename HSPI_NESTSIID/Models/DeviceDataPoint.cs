@@ -1,7 +1,7 @@
 ﻿using Scheduler.Classes;
 
 
-namespace HSPI_NESTSIID.Models
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin.Models
 {
     class DeviceDataPoint
     {

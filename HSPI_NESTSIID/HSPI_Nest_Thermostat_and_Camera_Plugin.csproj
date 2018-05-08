@@ -7,8 +7,8 @@
     <ProjectGuid>{3AC60BC3-F337-4B23-A31B-4EB88174FFFA}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HSPI_NESTSIID</RootNamespace>
-    <AssemblyName>HSPI_NESTSIID</AssemblyName>
+    <RootNamespace>HSPI_Nest_Thermostat_and_Camera_Plugin</RootNamespace>
+    <AssemblyName>HSPI_Nest_Thermostat_and_Camera_Plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace HSPI_NESTSIID.Models
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin.Models
 {
     [DataContract]
     class Devices

@@ -2,10 +2,10 @@
 using System.Text;
 using System.Web;
 using Scheduler;
-using HSPI_NESTSIID.Models;
+using HSPI_Nest_Thermostat_and_Camera_Plugin.Models;
 
 
-namespace HSPI_NESTSIID
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 {
     public class OptionsPage : PageBuilderAndMenu.clsPageBuilder
     {
@@ -82,7 +82,7 @@ namespace HSPI_NESTSIID
                 }*/
 
                 this.AddHeader(Util.hs.GetPageHeader(pageName, Util.IFACE_NAME, "", "", false, true));
-                //pluginSB.Append("<link rel = 'stylesheet' href = 'hspi_nestsiid/css/style.css' type = 'text/css' /><br>");
+                //pluginSB.Append("<link rel = 'stylesheet' href = 'HSPI_Nest_Thermostat_and_Camera_Plugin/css/style.css' type = 'text/css' /><br>");
                 //page.AddHeader(pluginSB.ToString());
 
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using HomeSeerAPI;
-using HSPI_NESTSIID.Models;
+using HSPI_Nest_Thermostat_and_Camera_Plugin.Models;
 using Scheduler.Classes;
 
-namespace HSPI_NESTSIID
+namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 {
     public class HSPI : IPlugInAPI
     {
@@ -192,7 +192,7 @@ namespace HSPI_NESTSIID
             {
                 //Console.WriteLine("Failed: No API Key?");
                 Util.Log(ex.ToString(), Util.LogType.LOG_TYPE_ERROR);
-                System.IO.File.WriteAllText(@"Data/hspi_nestsiid/debug.txt", ex.ToString());
+                System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/debug.txt", ex.ToString());
                 if(ex.ToString().Contains("connectNestData"))
                 {
                     observeRunning = false;
