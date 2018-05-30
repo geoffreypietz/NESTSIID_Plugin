@@ -872,8 +872,8 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 DT.Device_Type = 99;
             }
 
-            hs.NewDeviceRef(dvName_long + " " + dvName);
-            dvRef = hs.GetDeviceRefByName(dvName_long + " " + dvName);
+       
+            dvRef = hs.NewDeviceRef(dvName_long + " " + dvName);
             dv = (DeviceClass)hs.GetDeviceByRef(dvRef);
             dv.set_Address(hs, "");
             SetDeviceKeys(dv, device_id, dvName);
