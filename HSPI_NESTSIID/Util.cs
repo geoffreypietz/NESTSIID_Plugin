@@ -472,8 +472,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 }
             }
 
-            DeviceClass dv = new DeviceClass();
-            dv = GenericHomeSeerDevice(dv, tString, thermostat.name_long, thermostat.device_id, tString.Equals("Is Online"));
+            var dv = GenericHomeSeerDevice(tString, thermostat.name_long, thermostat.device_id, tString.Equals("Is Online"));
             var dvRef = dv.get_Ref(hs);
             id = GetDeviceKeys(dv, out name);
             switch (name)
@@ -742,8 +741,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 }
             }
 
-            DeviceClass dv = new DeviceClass();
-            dv = GenericHomeSeerDevice(dv, "Structure", structure.name, thermId, false);
+            var dv = GenericHomeSeerDevice("Structure", structure.name, thermId, false);
             var dvRef = dv.get_Ref(hs);
             id = GetDeviceKeys(dv, out name);
 
@@ -791,8 +789,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 }
             }
 
-            DeviceClass dv = new DeviceClass();
-            dv = GenericHomeSeerDevice(dv, cString, camera.name_long, camera.device_id, cString.Equals("Is Streaming"));
+            var dv = GenericHomeSeerDevice(cString, camera.name_long, camera.device_id, cString.Equals("Is Streaming"));
             var dvRef = dv.get_Ref(hs);
             id = GetDeviceKeys(dv, out name);
             switch (name)
@@ -861,7 +858,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             dev.set_PlugExtraData_Set(hs, pData);
         }
 
-        static internal DeviceClass GenericHomeSeerDevice(DeviceClass dv, string dvName, string dvName_long, string device_id, bool root)
+        static internal DeviceClass GenericHomeSeerDevice( string dvName, string dvName_long, string device_id, bool root)
         {
             int dvRef;
             Log("Creating Device: " + dvName_long + " " + dvName, LogType.LOG_TYPE_INFO);
@@ -874,7 +871,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 
        
             dvRef = hs.NewDeviceRef(dvName_long + " " + dvName);
-            dv = (DeviceClass)hs.GetDeviceByRef(dvRef);
+            var dv = (DeviceClass)hs.GetDeviceByRef(dvRef);
             dv.set_Address(hs, "");
             SetDeviceKeys(dv, device_id, dvName);
             //dv.set_Code(hs, device_id + "-" + dvName_long + "-" + dvName);

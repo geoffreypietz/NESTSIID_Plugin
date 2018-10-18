@@ -161,30 +161,33 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             {
                 if (!observeRunning) // Set True in NestConnection.connectNestData()
                 {
+                    observeRunning = true;
                     System.Threading.Tasks.Task.Factory.StartNew(() => RunObservableUpdate());
                 }
                 if (!running)
                 {
                     using (var nest = new NestConnection())
                     {
+                        running = true;
                         nest.setInitialConnectionProps();
                         if (nest.isAccessNotNull())
                         {
 
-                            running = true;
+                           
                             using (var nestData = nest.getNestData())
                             {
                                 Util.Find_Create_Devices(nestData.Devices);
                                 Util.Find_Create_Structures(nestData.Structures);
                             }
-                            running = false;
+                           
                         }
 
                         else
                         {
                             Util.Log( "Access Token is null", Util.LogType.LOG_TYPE_ERROR);
-                            running = false;
+                          
                         }
+                        running = false;
                     } 
                 }
             }
