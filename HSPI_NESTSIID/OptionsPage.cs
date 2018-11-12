@@ -43,7 +43,34 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                         pageCommands.Add("popmessage", "Failed to reset Access Token");
                     } 
                 }
-            }        
+            }
+            if (id == "devices_button")
+            {
+                using (var nest = new NestConnection())
+                {
+              
+                    nest.setInitialConnectionProps();
+                    if (nest.isAccessNotNull())
+                    {
+
+
+                        using (var nestData = nest.getNestData())
+                        {
+                            Util.Find_Create_Devices(nestData.Devices, true);
+                            Util.Find_Create_Structures(nestData.Structures, true);
+                        }
+
+                    }
+
+                    else
+                    {
+                        Util.Log("Access Token is null", Util.LogType.LOG_TYPE_ERROR);
+
+                    }
+                
+                }
+
+            }
 
             return base.postBackProc(page, data, user, userRights);
         }
@@ -147,6 +174,9 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 
                 optionsString.Append("<p>If the Reset was successful, restart the plugin and the new token should connect.</p>");
 
+
+                optionsString.Append("<p>Now hit the Create Homeseer devices to add the Nest devices to homeseer.</p>");
+                optionsString = BuildLinkButton(optionsString, "devices_button", "Create Homeseer devices", "");
                 optionsString.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd());
 
                 tab.tabContent = optionsString.ToString();

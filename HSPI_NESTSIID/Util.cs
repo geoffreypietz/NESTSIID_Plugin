@@ -344,7 +344,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 
 
 
-        static internal bool Find_Create_Devices(Devices devices)
+        static internal bool Find_Create_Devices(Devices devices, bool createDevices)
         {
             List<DeviceDataPoint> deviceList = new List<DeviceDataPoint>();
 
@@ -352,11 +352,11 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 
             var setAssociates = false;
 
-            if (Find_Create_Thermostats(devices, deviceList))
+            if (Find_Create_Thermostats(devices, deviceList, createDevices))
             {
                 setAssociates = true;
             }
-            if (Find_Create_Cameras(devices, deviceList))
+            if (Find_Create_Cameras(devices, deviceList, createDevices))
             {
                 setAssociates = true;
             }
@@ -369,7 +369,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             return true;
         }
 
-        static internal bool Find_Create_Thermostats(Devices devices, List<DeviceDataPoint> deviceList)
+        static internal bool Find_Create_Thermostats(Devices devices, List<DeviceDataPoint> deviceList, bool createDevices)
         {
             bool create;
             bool associates = false;
@@ -381,7 +381,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 {
                     foreach (var tString in tStrings)
                     {
-                        create = Thermostat_Devices(tString, thermostat.Value, null, deviceList);
+                        create = Thermostat_Devices(tString, thermostat.Value, null, deviceList, createDevices);
                         if (create) // True if a device was created
                             associates = true;
                     }
@@ -395,7 +395,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             return associates;
         }
 
-        static internal void Find_Create_Structures(Dictionary<string, Structures> structures)
+        static internal void Find_Create_Structures(Dictionary<string, Structures> structures, bool createDevices)
         {
             List<DeviceDataPoint> deviceList = new List<DeviceDataPoint>();
 
@@ -414,7 +414,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                     }
                     foreach (var thermId in structure.Value.thermostats)
                     {
-                        create = Structure_Devices(structure.Value, thermId, deviceList);
+                        create = Structure_Devices(structure.Value, thermId, deviceList, createDevices);
                         if (create) // True if a device was created
                             associates = true;
                     }
@@ -432,7 +432,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             }
         }
 
-        static internal bool Find_Create_Cameras(Devices devices, List<DeviceDataPoint> deviceList)
+        static internal bool Find_Create_Cameras(Devices devices, List<DeviceDataPoint> deviceList, bool createDevices)
         {
             bool create;
             bool associates = false;
@@ -444,7 +444,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                 {
                     foreach (var cString in cStrings)
                     {
-                        create = Camera_Devices(cString, camera.Value, deviceList);
+                        create = Camera_Devices(cString, camera.Value, deviceList,createDevices);
                         if (create) // True if a device was created
                             associates = true;
                     }
@@ -457,7 +457,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             return associates;
         }
 
-        static internal bool Thermostat_Devices(string tString, Thermostat thermostat, Structures structure, List<DeviceDataPoint> deviceList)
+        static internal bool Thermostat_Devices(string tString, Thermostat thermostat, Structures structure, List<DeviceDataPoint> deviceList, bool createDevices)
         {
             string name;
             string id;
@@ -470,6 +470,12 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                     Update_ThermostatDevice(thermostat, structure, ddPoint);
                     return false;
                 }
+            }
+            if (!createDevices)
+            {
+                Log("Missing Homeseer device: " + tString + " please click on the Create Homeseer devices button on the Nest plugin configuration page", LogType.LOG_TYPE_WARNING);
+                return false;
+
             }
 
             var dv = GenericHomeSeerDevice(tString, thermostat.name_long, thermostat.device_id, tString.Equals("Is Online"));
@@ -726,7 +732,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
             return true;
         }
 
-        static internal bool Structure_Devices(Structures structure, string thermId, List<DeviceDataPoint> deviceList)
+        static internal bool Structure_Devices(Structures structure, string thermId, List<DeviceDataPoint> deviceList, bool createDevices)
         {
             string name;
             string id;
@@ -739,6 +745,12 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                     Update_StructureDevice(structure, ddPoint);
                     return false;
                 }
+            }
+            if (!createDevices)
+            {
+                Log("Missing Homeseer device: " + structure.name + " please click on the Create Homeseer devices button on the Nest plugin configuration page", LogType.LOG_TYPE_WARNING);
+                return false;
+
             }
 
             var dv = GenericHomeSeerDevice("Structure", structure.name, thermId, false);
@@ -774,7 +786,7 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
 
             return true;
         }
-        static internal bool Camera_Devices(string cString, Camera camera, List<DeviceDataPoint> deviceList)
+        static internal bool Camera_Devices(string cString, Camera camera, List<DeviceDataPoint> deviceList, bool createDevices)
         {
             string name;
             string id;
@@ -787,6 +799,12 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                     Update_CameraDevice(camera, ddPoint);
                     return false;
                 }
+            }
+            if (!createDevices)
+            {
+                Log("Missing Homeseer device: " + cString + " please click on the Create Homeseer devices button on the Nest plugin configuration page", LogType.LOG_TYPE_WARNING);
+                return false;
+
             }
 
             var dv = GenericHomeSeerDevice(cString, camera.name_long, camera.device_id, cString.Equals("Is Streaming"));

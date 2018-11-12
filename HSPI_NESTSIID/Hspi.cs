@@ -155,6 +155,10 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
         }
 
         #region - UpdateUI
+
+
+
+
         private void updateStatusValues()
         {
             try
@@ -176,8 +180,8 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin
                            
                             using (var nestData = nest.getNestData())
                             {
-                                Util.Find_Create_Devices(nestData.Devices);
-                                Util.Find_Create_Structures(nestData.Structures);
+                                Util.Find_Create_Devices(nestData.Devices,false);
+                                Util.Find_Create_Structures(nestData.Structures,false);
                             }
                            
                         }

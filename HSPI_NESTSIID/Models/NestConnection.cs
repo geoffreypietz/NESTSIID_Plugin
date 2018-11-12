@@ -132,8 +132,8 @@ namespace HSPI_Nest_Thermostat_and_Camera_Plugin.Models
                 //System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/setapi.txt", "1");
                 var firebaseClient = new FirebaseClient(newPath, new FirebaseOptions { AuthTokenAsyncFactory = () => Task.FromResult(access_token) });
                 //System.IO.File.WriteAllText(@"Data/HSPI_Nest_Thermostat_and_Camera_Plugin/setapi.txt", "2");
-                var observable = firebaseClient.Child("devices").AsObservable<Devices>().Subscribe(d => Util.Find_Create_Devices(d.Object));
-                var observable2 = firebaseClient.Child("structures").AsObservable<Dictionary<string, Structures>>().Subscribe(d => Util.Find_Create_Structures(d.Object));
+                var observable = firebaseClient.Child("devices").AsObservable<Devices>().Subscribe(d => Util.Find_Create_Devices(d.Object,false));
+                var observable2 = firebaseClient.Child("structures").AsObservable<Dictionary<string, Structures>>().Subscribe(d => Util.Find_Create_Structures(d.Object,false));
                 HSPI.observeRunning = true;           
             }
         }
